@@ -213,6 +213,30 @@ impl Drop for ActiveDeviceSession {
 }
 
 impl ActiveDeviceSession {
+    /// Check the live phone before any AFC mutation, including staging cleanup.
+    /// Scanning and the handshake-only probe deliberately keep using `open`.
+    pub fn open_for_airlift(target_udid: Option<&str>) -> Result<Self> {
+        let session = Self::open(target_udid)?;
+        let read_value = |key: &str| -> Result<String> {
+            let cf_key = session.libs.create_cf_string(key)?;
+            let value = unsafe {
+                (session.libs.am_device_copy_value)(session.device, ptr::null(), cf_key.raw)
+            };
+            if value.is_null() {
+                bail!("Cannot read {key}; refusing Airlift operations before AFC staging");
+            }
+            let text = session.libs.to_rust_string(value);
+            unsafe { (session.libs.cf_release)(value) };
+            Ok(text)
+        };
+        let version = read_value("ProductVersion")?;
+        let build = read_value("BuildVersion")?;
+        if let Some(reason) = crate::compatibility::write_block_reason(&version, &build) {
+            bail!("{reason}");
+        }
+        Ok(session)
+    }
+
     pub fn open(target_udid: Option<&str>) -> Result<Self> {
         let libs = get_apple_libraries()?;
         let entries = query_usbmux_devices()?;

@@ -1,5 +1,13 @@
 # AirCard (Windows)
 
+## Compatibility diagnostic fork — 1.3.6-compat.1
+
+**This build does not restore artwork flashing on iOS 27.2 RC.** It fixes the misleading failure flow: live `ProductVersion` / `BuildVersion` are checked before AFC staging or cleanup for writes, cache relocation, and original-art exports. Unsupported versions receive a clear error and a GUI banner instead of uploading assets and waiting for the generic sync timeout. Scanning and the handshake-only probe remain available.
+
+The two known working 27.2 beta builds (`24B5084k`, `24B5089g`) remain allowed. Other 27.2 builds, including RC `24B115`, are refused according to upstream's compatibility notice. Unrecognized versions are refused rather than assumed compatible. This is a compatibility policy, not an on-device exploit test. **A successful `--probe` / `ReadyForSync` does not prove that protected file writes work.**
+
+[Diagnóstico em português e limites da correção](docs/diagnostico-ios-27.2.md).
+
 **Apple Wallet card skinner & lockscreen passcode themer for iOS 18.0–27.0.1 and iOS 27.2 beta 1–2 (no jailbreak).** Native Rust client. This public fork keeps Lumid-Off’s Windows port and adds a working AirTraffic handshake on Windows (including **iOS 26.x**). **iOS 27.2 beta 3+ is patched.**
 
 **Tutorial Bahasa Indonesia:** [TUTORIAL.id.md](TUTORIAL.id.md)

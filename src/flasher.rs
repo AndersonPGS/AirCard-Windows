@@ -176,7 +176,7 @@ where
         items.len(),
         chunk_label
     ));
-    let session = ActiveDeviceSession::open(Some(udid))
+    let session = ActiveDeviceSession::open_for_airlift(Some(udid))
         .context("Failed to open device session for writing")?;
     let afc = AfcClient::new(&session).context("Failed to open AFC connection")?;
     let n = cleanup_airlift_staging(&afc, &mut *log);
@@ -329,7 +329,7 @@ where
         "Relocating {} cache file(s) out of {target_dir} (iOS 27 invalidation)...",
         leaves.len()
     ));
-    let session = ActiveDeviceSession::open(Some(udid))
+    let session = ActiveDeviceSession::open_for_airlift(Some(udid))
         .context("Failed to open device session for cache removal")?;
     let afc = AfcClient::new(&session).context("Failed to open AFC for cache removal")?;
     let n = cleanup_airlift_staging(&afc, &mut log);
@@ -450,7 +450,7 @@ where
     let file_ident = airlock_relpath(&full);
 
     log(&format!("Exporting {leaf} via Airlift move (will write it back)..."));
-    let session = ActiveDeviceSession::open(Some(udid))
+    let session = ActiveDeviceSession::open_for_airlift(Some(udid))
         .context("Failed to open device session for original-art read")?;
     let afc = AfcClient::new(&session).context("Failed to open AFC for original-art read")?;
     let n = cleanup_airlift_staging(&afc, &mut log);

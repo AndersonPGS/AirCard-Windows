@@ -5,6 +5,7 @@ mod airlift;
 mod airtraffic;
 mod app;
 mod apple;
+mod compatibility;
 mod device;
 mod flasher;
 mod host_guard;
@@ -147,6 +148,7 @@ fn cli_probe() -> anyhow::Result<()> {
         anyhow::bail!("Multiple USB devices found; probe requires exactly one");
     }
     println!("probe = AirTraffic handshake only; no AFC staging or Wallet asset writes");
+    println!("note  = {}", compatibility::PROBE_LIMITATION);
     airtraffic::sync_assets_via_airtraffic(&device.udid, &[], |msg| println!("log: {msg}"))?;
     println!("probe DONE — ReadyForSync received");
     Ok(())
@@ -154,7 +156,7 @@ fn cli_probe() -> anyhow::Result<()> {
 
 fn cleanup_books(udid: &str) -> anyhow::Result<()> {
     println!("cleanup   = clearing leftover Books/airlift staging...");
-    let session = device::ActiveDeviceSession::open(Some(udid))?;
+    let session = device::ActiveDeviceSession::open_for_airlift(Some(udid))?;
     let afc = afc::AfcClient::new(&session)?;
     let n = airlift::cleanup_airlift_staging(&afc, |msg| println!("cleanup   = {msg}"));
     println!("cleanup   = {n} leftover path(s) removed");

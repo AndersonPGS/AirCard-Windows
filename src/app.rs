@@ -1025,6 +1025,7 @@ impl AirCardApp {
         self.progress_msg = "Probing AirTraffic handshake...".to_string();
         self.status_msg = "Handshake probe (no Wallet write)...".to_string();
         self.add_log("Starting AirTraffic handshake probe (no AFC cleanup, no asset write)");
+        self.add_log(crate::compatibility::PROBE_LIMITATION);
 
         let (tx, rx) = channel();
         self.task_rx = Some(rx);
@@ -1385,6 +1386,19 @@ impl eframe::App for AirCardApp {
             )
             .show(ctx, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| {
+                    if let Some(reason) = self.devices.iter()
+                        .find(|d| Some(&d.udid) == self.selected_udid.as_ref())
+                        .and_then(|d| crate::compatibility::write_block_reason(&d.ios_version, &d.build_version))
+                    {
+                        egui::Frame::new()
+                            .fill(md3::ERROR_CONTAINER)
+                            .corner_radius(12)
+                            .inner_margin(egui::Margin::same(12))
+                            .show(ui, |ui| {
+                                ui.label(egui::RichText::new(reason).size(12.0).color(md3::ERROR));
+                            });
+                        ui.add_space(8.0);
+                    }
                     if !self.blocking_apps.is_empty() {
                         let warn = i18n::t(self.lang).itunes_warn;
                         let apps = self.blocking_apps.join(", ");
